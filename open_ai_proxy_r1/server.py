@@ -32,6 +32,8 @@ def extract_boxed_content(text):
 
 
 def postprocess_output(text: str, postprocess:bool) -> str:
+    if text is None:
+        return ""
     if postprocess:
         text = extract_boxed_content(text)
         text = text.strip()
