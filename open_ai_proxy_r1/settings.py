@@ -6,7 +6,7 @@ from typing import List
 
 class ModelSettings(BaseModel):
     temperature: float
-
+    stop: list
 
 class ServerSettings(BaseModel):
     VLLM_SERVER_URL: str
