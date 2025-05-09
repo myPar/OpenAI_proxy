@@ -69,7 +69,7 @@ done
 cd /userspace/bak2/MERA_space/MERA
 export OPENAI_API_KEY="token-abc123" 
 export MERA_FOLDER="/userspace/bak2/mera_results/api-DeepSeek-R1-Distill-Qwen-1.5B"
-export MERA_MODEL_STRING="model=deepseek-ai/DeepSeek-R1-Distill-Qwen-1.5B,num_concurrent=8,base_url=http://localhost:8000/v1/chat/completions"
+export MERA_MODEL_STRING="model=deepseek-ai/DeepSeek-R1-Distill-Qwen-1.5B,num_concurrent=8,base_url=http://localhost:8000/v1/chat/completions,tokenizer_backend=vllm,tokenizer=deepseek-ai/DeepSeek-R1-Distill-Qwen-1.5B"
 export MERA_COMMON_SETUP="--model openai-chat-completions --batch_size=1 --predict_only --log_samples --seed 1234 --verbosity INFO --apply_chat_template"
 bash scripts/run_benchmark.sh
 
