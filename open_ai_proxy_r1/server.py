@@ -69,6 +69,7 @@ async def proxy_completions(request: Request):
         "Content-Type": "application/json",
     }
     body["temperature"] = app_settings.model_settings.temperature   # set temperature to recommended value
+    body["stop"] = app_settings.model_settings.stop   # set stop field
     print(f"{app_settings.server_settings.VLLM_SERVER_URL}/v1/completions")
     print(body)
     response = await client.post(f"{app_settings.server_settings.VLLM_SERVER_URL}/v1/completions", json=body, headers=headers)
@@ -97,6 +98,7 @@ async def proxy_chat_completions(request: Request):
         "Content-Type": "application/json",
     }
     body["temperature"] = app_settings.model_settings.temperature   # set temperature to recommended value
+    body["stop"] = app_settings.model_settings.stop   # set stop field
     print(f"body: {body}")
     response = await client.post(f"{app_settings.server_settings.VLLM_SERVER_URL}/v1/chat/completions", json=body, headers=headers)
     result = response.json()

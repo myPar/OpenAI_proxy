@@ -6,6 +6,7 @@
         "POSTPROCESS": true
     },
     "model_settings": {
-        "temperature": 0.6
+        "temperature": 0.6,
+        "stop": []
     }
 }
