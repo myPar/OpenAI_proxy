@@ -25,7 +25,7 @@ export PIP_CACHE_DIR="/userspace/bak2/pip/.cache"
 
 # other cache dirs can be set in the same manner:
 export HF_HOME="/userspace/bak2/hf"
-export HF_TOKEN="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"
+export HF_TOKEN=""
 export VLLM_NO_USAGE_STATS=1
 export VLLM_CACHE_ROOT="/userspace/bak2/vllm_cache"
 
@@ -39,8 +39,8 @@ echo $VLLM_PID > vllm.pid
 
 # wait till vllm server is up
 echo "Waiting for vLLM server to start..."
-for i in {1..600}; do
-    if curl -s http://localhost:8001/v1/models | grep -q '"object"'; then
+for i in {1..6000}; do
+    if curl -s -H "Authorization: Bearer token-abc123" http://localhost:8001/v1/models | grep -q '"object"'; then
         echo "vLLM server is up!"
         break
     fi
@@ -70,7 +70,7 @@ cd /userspace/bak2/MERA_space/MERA
 export OPENAI_API_KEY="token-abc123" 
 export MERA_FOLDER="/userspace/bak2/mera_results/api-DeepSeek-R1-Distill-Qwen-1.5B"
 export MERA_MODEL_STRING="model=deepseek-ai/DeepSeek-R1-Distill-Qwen-1.5B,num_concurrent=8,base_url=http://localhost:8000/v1/chat/completions"
-export MERA_COMMON_SETUP="--model openai-chat-completions --batch_size=1 --predict_only --log_samples --seed 1234 --verbosity INFO --apply_chat_template"
+export MERA_COMMON_SETUP="--model openai-chat-completions --batch_size=1 --predict_only --log_samples --seed 1234 --verbosity INFO"
 bash scripts/run_benchmark.sh
 
 kill $VLLM_PID
