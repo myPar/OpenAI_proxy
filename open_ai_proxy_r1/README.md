@@ -49,7 +49,7 @@ curl http://localhost:8000/v1/chat/completions \
     "model": "deepseek-ai/DeepSeek-R1-Distill-Qwen-1.5B",
     "messages": [
       {"role": "system", "content": "Ты математический помощник."},
-      {"role": "user", "content": "Реши уравнение x^2 = 4 и обоснуй решение."}
+      {"role": "user", "content": "Реши уравнение x^2 = и обоснуй решение."}
     ]
   }'
 ```
@@ -62,7 +62,7 @@ curl http://localhost:8000/v1/completions \
   -H "Content-Type: application/json" \
   -d '{
     "model": "deepseek-ai/DeepSeek-R1-Distill-Qwen-1.5B",
-    "prompt": "Реши уравнение x^2 = 4"
+    "prompt": "Реши уравнение x^2 = "
   }'
 ```
 
