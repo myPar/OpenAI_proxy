@@ -3,12 +3,18 @@
 Этот репозиторий содержит прокси-сервер для работы с DeepSeek-r1 и его дистиллятами, совместимый с OpenAI API, который перенаправляет запросы к локальному серверу [vLLM](https://github.com/vllm-project/vllm).
 
 - Совместим с OpenAI API (`/v1/completions`, `/v1/chat/completions`)
-- Перемещает `system`-сообщения в `user`
+- Перемещает `system` prompt в `user` (рекомендуется для deepseek-r1 и его дистиллятов)
 - Опциональная очистка вывода (`\boxed{...}` → просто `...`)
 - опциональное удаление reasoning (`reasoning_content`) из ответа
 - Настройка температуры
 
 ### Установка зависимостей
+
+клонируем репозиторий:
+```bash
+git clone https://github.com/myPar/OpenAI_proxy.git
+cd open_ai_proxy_r1
+```
 
 Создайте `conda` venv и установите зависимости:
 
