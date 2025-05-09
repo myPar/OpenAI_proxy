@@ -25,6 +25,7 @@ export PIP_CACHE_DIR="/userspace/bak2/pip/.cache"
 
 # other cache dirs can be set in the same manner:
 export HF_HOME="/userspace/bak2/hf"
+export HF_TOKEN=""
 export VLLM_NO_USAGE_STATS=1
 export VLLM_CACHE_ROOT="/userspace/bak2/vllm_cache"
 

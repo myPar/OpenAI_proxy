@@ -1,6 +1,7 @@
 #!/bin/bash
 . /home/cossmo/miniconda3/etc/profile.d/conda.sh
 conda activate vllm_venv
+export HF_TOKEN=""
 
 # run vllm server:
 vllm serve deepseek-ai/DeepSeek-R1-Distill-Qwen-1.5B \
