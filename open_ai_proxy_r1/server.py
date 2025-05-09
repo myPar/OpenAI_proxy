@@ -97,11 +97,10 @@ async def proxy_chat_completions(request: Request):
         "Content-Type": "application/json",
     }
     body["temperature"] = app_settings.model_settings.temperature   # set temperature to recommended value
-    print(f"{app_settings.server_settings.VLLM_SERVER_URL}/v1/chat/completions")
-    print(body)
+    print(f"body: {body}")
     response = await client.post(f"{app_settings.server_settings.VLLM_SERVER_URL}/v1/chat/completions", json=body, headers=headers)
     result = response.json()
-
+    print(f"result: {result}")
     # Postprocess output
     if "choices" in result:
         for choice in result["choices"]:
