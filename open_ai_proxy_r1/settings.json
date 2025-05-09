@@ -1,0 +1,11 @@
+{
+    "server_settings": {
+        "VLLM_SERVER_URL": "http://localhost:8001",
+        "OPENAI_API_KEY": "token-abc123",
+        "RETURN_THINK_DATA": true,
+        "POSTPROCESS": true
+    },
+    "model_settings": {
+        "temperature": 0.6
+    }
+}
