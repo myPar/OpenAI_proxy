@@ -65,7 +65,6 @@ def preprocess_chat_prompts(messages: list) -> list:
 @app.post("/v1/completions")
 async def proxy_completions(request: Request):
     body = await request.json()
-    print(body)
     headers = {
         "Authorization": f"Bearer {app_settings.server_settings.OPENAI_API_KEY}",
         "Content-Type": "application/json",
@@ -74,11 +73,10 @@ async def proxy_completions(request: Request):
     body["stop"] = app_settings.model_settings.stop   # set stop field
     body["max_completion_tokens"] = app_settings.model_settings.max_completion_tokens
     body["top_p"] = app_settings.model_settings.top_p    
-    print(f"{app_settings.server_settings.VLLM_SERVER_URL}/v1/completions")
     print(body)
     response = await client.post(f"{app_settings.server_settings.VLLM_SERVER_URL}/v1/completions", json=body, headers=headers)
     result = response.json()
-
+    print(f"result: {result}")
     # Postprocess output
     if "choices" in result:
         for choice in result["choices"]:
@@ -90,7 +88,6 @@ async def proxy_completions(request: Request):
 @app.post("/v1/chat/completions")
 async def proxy_chat_completions(request: Request):
     body = await request.json()
-    print(body)
     # Preprocess system prompt (or any message role-based logic)
     if "messages" in body:
         body["messages"] = preprocess_chat_prompts(body["messages"])    # move system prompt content to user prompt
