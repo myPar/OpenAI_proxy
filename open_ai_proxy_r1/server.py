@@ -72,6 +72,8 @@ async def proxy_completions(request: Request):
     }
     body["temperature"] = app_settings.model_settings.temperature   # set temperature to recommended value
     body["stop"] = app_settings.model_settings.stop   # set stop field
+    body["max_completion_tokens"] = app_settings.model_settings.max_completion_tokens
+    body["top_p"] = app_settings.model_settings.top_p    
     print(f"{app_settings.server_settings.VLLM_SERVER_URL}/v1/completions")
     print(body)
     response = await client.post(f"{app_settings.server_settings.VLLM_SERVER_URL}/v1/completions", json=body, headers=headers)
@@ -101,6 +103,8 @@ async def proxy_chat_completions(request: Request):
     }
     body["temperature"] = app_settings.model_settings.temperature   # set temperature to recommended value
     body["stop"] = app_settings.model_settings.stop   # set stop field
+    body["max_completion_tokens"] = app_settings.model_settings.max_completion_tokens
+    body["top_p"] = app_settings.model_settings.top_p
     print(f"body: {body}")
     response = await client.post(f"{app_settings.server_settings.VLLM_SERVER_URL}/v1/chat/completions", json=body, headers=headers)
     result = response.json()

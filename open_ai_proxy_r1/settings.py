@@ -7,6 +7,8 @@ from typing import List
 class ModelSettings(BaseModel):
     temperature: float
     stop: list
+    top_p: float
+    max_completion_tokens: int
 
 class ServerSettings(BaseModel):
     VLLM_SERVER_URL: str
