@@ -44,18 +44,23 @@ def postprocess_output(text: str, postprocess:bool) -> str:
 def preprocess_chat_prompts(messages: list) -> list:
     i = 0
     result_messages = []
+    sys_prompt = None
 
     while i < len(messages):
         msg = messages[i]
         if msg['role'] == 'system':
             # set system prompt to empty string
             sys_prompt = msg['content']
-            
-            # add system prompt to user prompt
-            if i < len(messages) - 1 and messages[i + 1]['role'] == 'user' and sys_prompt.strip() != "":
-                messages[i + 1]['content'] = sys_prompt + '\n' + messages[i + 1]['content']
             i += 1
             continue
+        elif msg['role'] == 'user':
+            # for mathematic problems add recommended prefix for r1:
+            if app_settings.server_settings.MATHEMATIC:
+                msg['content'] = "You will be given a problem. Please reason step by step, and put your final answer within \\boxed{}:\n" + msg['content']
+            # add last system prompt to user as recommended for r1:                
+            if sys_prompt is not None and sys_prompt.strip() != "":
+                msg['content'] = sys_prompt + '\n' + msg['content']
+                
         result_messages.append(msg)
         i += 1
 
@@ -102,6 +107,7 @@ async def proxy_chat_completions(request: Request):
     body["stop"] = app_settings.model_settings.stop   # set stop field
     body["max_completion_tokens"] = app_settings.model_settings.max_completion_tokens
     body["top_p"] = app_settings.model_settings.top_p
+
     response = await client.post(f"{app_settings.server_settings.VLLM_SERVER_URL}/v1/chat/completions", json=body, headers=headers)
     result = response.json()
     print(f"body: {body}")

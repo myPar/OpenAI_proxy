@@ -1,8 +1,8 @@
 #!/bin/bash
-#SBATCH --job-name=mera_r1
+#SBATCH --job-name=mera_r1_no_fewshot
 #SBATCH --partition=a100
-#SBATCH --output=output
-#SBATCH --error=output.err
+#SBATCH --output=no_fewshot_output
+#SBATCH --error=no_fewshot_output.err
 #SBATCH --nodes=1
 #SBATCH --ntasks=1
 #SBATCH --cpus-per-task=1
@@ -71,7 +71,7 @@ cd /userspace/bak2/MERA_space/MERA
 export OPENAI_API_KEY="token-abc123" 
 export MERA_FOLDER="/userspace/bak2/mera_results/api-DeepSeek-R1-Distill-Qwen-1.5B"
 export MERA_MODEL_STRING="model=deepseek-ai/DeepSeek-R1-Distill-Qwen-1.5B,num_concurrent=8,base_url=http://localhost:8000/v1/chat/completions,tokenizer_backend=huggingface,tokenizer=deepseek-ai/DeepSeek-R1-Distill-Qwen-1.5B"
-export MERA_COMMON_SETUP="--model local-chat-completions --batch_size=1 --predict_only --log_samples --seed 1234 --verbosity INFO --apply_chat_template"
+export MERA_COMMON_SETUP="--model local-chat-completions --batch_size=1 --predict_only --log_samples --seed 1234 --verbosity INFO --apply_chat_template --num_fewshot 0"
 bash scripts/run_benchmark.sh
 
 kill $VLLM_PID

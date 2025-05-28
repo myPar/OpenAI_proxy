@@ -13,8 +13,9 @@ class ModelSettings(BaseModel):
 class ServerSettings(BaseModel):
     VLLM_SERVER_URL: str
     OPENAI_API_KEY: str
-    RETURN_THINK_DATA: bool
-    POSTPROCESS: bool
+    RETURN_THINK_DATA: bool # weather return reasoning_content field or not
+    POSTPROCESS: bool       # use output postprocessing or not
+    MATHEMATIC: bool        # weather to ask to solve mathematic task or not
 
 class AppSettings(BaseModel):
     server_settings: ServerSettings
