@@ -27,3 +27,19 @@ content = response.choices[0].message.content
 
 print("reasoning_content:", reasoning_content)
 print("content:", content)
+
+
+response = openai.Completion.create(
+    model="deepseek-llm",  # or "mistral", etc.
+    prompt="Q: What is the capital of France?\nA:",
+    max_tokens=32,
+    temperature=0.7,
+    logprobs=5,
+    echo=True,
+)
+
+# Print full response
+print(response)
+
+# Just the text
+print("Answer:", response["choices"][0]["text"])
