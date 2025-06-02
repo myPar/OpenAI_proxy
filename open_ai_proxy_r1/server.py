@@ -66,6 +66,7 @@ def preprocess_chat_prompts(messages: list) -> list:
 
     return result_messages
 
+
 # legacy api, <think> token can't be added manually, only model itself will do it or not
 @app.post("/v1/completions")
 async def proxy_completions(request: Request):
