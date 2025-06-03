@@ -49,5 +49,23 @@ for i in {1..600000}; do
     sleep 1
 done
 
+# run proxy
+fastapi run server.py &
+# cache pid for killing in future
+PROXY_PID=$!
+echo "PROXY PID: $PROXY_PID"
+echo $PROXY_PID > proxy.pid
+
+# wait till proxy server up
+echo "Waiting proxy server to start..."
+for i in {1..240}; do
+    if curl -s http://localhost:8000/ping | grep -q '"pong"'; then
+        echo "proxy server is up!"
+        break
+    fi
+    echo "⏳ proxy server not ready yet... retrying ($i)"
+    sleep 1
+done
+
 python /userspace/bak2/OpenAI_proxy/open_ai_proxy_r1/test_client.py
 kill $VLLM_PID
