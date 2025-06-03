@@ -4,12 +4,16 @@
         "OPENAI_API_KEY": "token-abc123",
         "RETURN_THINK_DATA": true,
         "POSTPROCESS": true,
-        "MATHEMATIC": false
+        "MATHEMATIC": false,
+        "PREPROCESS_FEW_SHOT": true,
+        "PROPER_CHAT_FORMAT": true,
+        "DEFAULT_MODEL_SETTINGS": true,
+        "CLIENT_TIMEOUT": 600
     },
     "model_settings": {
         "temperature": 0.6,
         "top_p": 0.95,
-        "max_completion_tokens": 2048,
+        "max_completion_tokens": 1024,
         "stop": []
     }
 }
