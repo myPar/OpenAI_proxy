@@ -67,5 +67,6 @@ for i in {1..240}; do
     sleep 1
 done
 
-python /userspace/bak2/OpenAI_proxy/open_ai_proxy_r1/test_client.py
+python /userspace/bak2/r1_32b/OpenAI_proxy/open_ai_proxy_r1/test_client.py
 kill $VLLM_PID
+kill $PROXY_PID
