@@ -9,7 +9,7 @@ client = OpenAI(
     api_key=openai_api_key,
     base_url=openai_api_base,
 )
-model="deepseek-ai/DeepSeek-R1-Distill-Qwen-1.5B"
+model="deepseek-ai/DeepSeek-R1-Distill-Qwen-32B"
 
 def openai_chat_request(test_name, messages):
     print(f"\n===== [CHAT] {test_name} =====")
