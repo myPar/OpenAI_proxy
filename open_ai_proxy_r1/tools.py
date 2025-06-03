@@ -72,7 +72,7 @@ def preprocess_few_shot(messages: list) -> list:
             if len(messages) == 2:
                 assert messages[1]['role'] == 'user'    # only user role can be after system
                 
-                return [{'role':'user', 'content': system_prompt + "\n" + messages[0]['content']}]
+                return [{'role':'user', 'content': system_prompt + "\n" + messages[1]['content']}]
         # build single dialog prompt:
         result_prompt = "" if system_prompt is None else system_prompt + "\n"
         result_prompt += "here is a dialog, answer user's last query:\n"
