@@ -12,7 +12,7 @@ client = OpenAI(
 model="deepseek-ai/DeepSeek-R1-Distill-Qwen-32B"
 
 def openai_chat_request(test_name, messages):
-    print(f"\n===== [CHAT] {test_name} =====")
+    print(f"\n===== [CHAT] {test_name} =====\n")
     try:
         response = client.chat.completions.create(model=model, messages=messages)
         message = response.choices[0].message
@@ -26,7 +26,7 @@ def openai_chat_request(test_name, messages):
 
 
 def openai_completion_request(test_name, prompt):
-    print(f"\n===== [COMPLETION] {test_name} =====")
+    print(f"\n===== [COMPLETION] {test_name} =====\n")
     try:
         response = client.completions.create(model=model, prompt=prompt, max_tokens=100)
         print("completion:", response.choices[0].text)
@@ -53,11 +53,6 @@ openai_chat_request("Error: No system message", [
 ])
 
 # Normal cases
-openai_chat_request("Normal: Single user prompt", [
-    { "role": "system", "content": "ты ассистент для интеллектуальной викторины." },
-    { "role": "user", "content": "Сколько будет 1+100?" }
-])
-
 openai_chat_request("Normal: Multi-turn history", [
     { "role": "system", "content": "ты ассистент для интеллектуальной викторины." },
     { "role": "user", "content": "Сколько будет 1+100?" },
@@ -65,12 +60,24 @@ openai_chat_request("Normal: Multi-turn history", [
     { "role": "user", "content": "Сколько ног у лошади?" }
 ])
 
+openai_chat_request("Normal: Medicine", [
+    {"role": "system", "content":"Ты медицинский эксперт. Пользователь будет спрашивать тебя как решить определённые проблемы со здоровьем."},
+    { "role": "user", "content": "Подскажи как справится с бессонницей, если много времени проводишь за гаджетами по работе и во время отдыха?" }
+])
+
+openai_chat_request("Normal: Algorithms", [
+    { "role": "user", "content": "Проверьте, сбалансирована ли входная последовательность скобок:\n} } ) [ } ] ) { [ { { ] ( ( ] ) ( ) [ {\nВыведите 1, если да и 0 в противном случае." }
+])
+
 openai_chat_request("Normal: Logic MCQ", [
     { "role": "system", "content": "ты ассистент для интеллектуальной викторины." },
     { "role": "user", "content": "Выбери один правильный вариант ответа. Напиши только букву ответа. Кто использует кровеносную систему?\nA. лошадь\nB. дерево\nC. машина\nD. скала\nОтвет:" }
 ])
 
+openai_chat_request("Normal: Code", [
+    { "role": "user", "content": "напиши алгоритм сортировки слиянием на C++" }
+])
+
 # ───── Completion Endpoint Tests ─────
-openai_completion_request("Simple math", "Сколько будет 2 + 2?\nОтвет:")
-openai_completion_request("Trivia question", "Кто написал роман «Война и мир»?\nОтвет:")
-openai_completion_request("Error: Empty prompt", "")
+openai_completion_request("Simple math", "Сколько будет 1458 + 293?\nОтвет:")
+openai_completion_request("Trivial question", "Кто написал роман «Война и мир»? Сколько в нём страниц\nОтвет:")
