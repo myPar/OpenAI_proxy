@@ -29,6 +29,7 @@ async def proxy_completions(request: Request):
         "Authorization": f"Bearer {app_settings.server_settings.OPENAI_API_KEY}",
         "Content-Type": "application/json",
     }
+    stop = None if "stop" not in body else body["stop"]
     # math preprocessing:
     if app_settings.server_settings.MATHEMATIC:
         body['prompt'] = preprocess_math(body['prompt'])
@@ -39,12 +40,16 @@ async def proxy_completions(request: Request):
         body["top_p"] = app_settings.model_settings.top_p
     response = await client.post(f"{app_settings.server_settings.VLLM_SERVER_URL}/v1/completions", json=body, headers=headers)
     result = response.json()
-    print(f"body: {body}")
-    print(f"result: {result}")
+    # print(f"body: {body}")
+    # print(f"result: {result}")
     # Postprocess output
     if "choices" in result:
         for choice in result["choices"]:
-            choice["text"] = postprocess_output(choice["text"], app_settings.server_settings.POSTPROCESS)
+            choice["text"] = postprocess_output(choice["text"], 
+                                                app_settings.server_settings.POSTPROCESS, 
+                                                app_settings.server_settings.MATHEMATIC, 
+                                                stop
+                                                )
 
     return JSONResponse(content=result, status_code=response.status_code)
 
@@ -82,6 +87,7 @@ async def proxy_chat_completions(request: Request):
         "Authorization": f"Bearer {app_settings.server_settings.OPENAI_API_KEY}",
         "Content-Type": "application/json",
     }
+    stop = None if "stop" not in body else body["stop"]
     if app_settings.server_settings.DEFAULT_MODEL_SETTINGS:
         body["temperature"] = app_settings.model_settings.temperature   # set temperature to recommended value
         body["stop"] = app_settings.model_settings.stop   # set stop field
@@ -90,8 +96,8 @@ async def proxy_chat_completions(request: Request):
 
     response = await client.post(f"{app_settings.server_settings.VLLM_SERVER_URL}/v1/chat/completions", json=body, headers=headers)
     result = response.json()
-    print(f"body: {body}")
-    print(f"result: {result}")
+    # print(f"body: {body}")
+    # print(f"result: {result}")
  
     # Postprocess output
     if "choices" in result:
@@ -99,7 +105,11 @@ async def proxy_chat_completions(request: Request):
             if "message" in choice:
                 if "reasoning_content" in choice["message"] and not app_settings.server_settings.RETURN_THINK_DATA: # remove think data field from the response
                     choice["message"].pop("reasoning_content")
-                choice["message"]["content"] = postprocess_output(choice["message"]["content"], app_settings.server_settings.POSTPROCESS)
+                choice["message"]["content"] = postprocess_output(choice["message"]["content"], 
+                                                                  app_settings.server_settings.POSTPROCESS, 
+                                                                  app_settings.server_settings.MATHEMATIC, 
+                                                                  stop
+                                                                  )
 
     return JSONResponse(content=result, status_code=response.status_code)
 

@@ -8,7 +8,7 @@
         "PREPROCESS_FEW_SHOT": true,
         "PROPER_CHAT_FORMAT": true,
         "DEFAULT_MODEL_SETTINGS": true,
-        "CLIENT_TIMEOUT": 600
+        "CLIENT_TIMEOUT": 6000
     },
     "model_settings": {
         "temperature": 0.6,

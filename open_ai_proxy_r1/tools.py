@@ -9,12 +9,27 @@ def extract_boxed_content(text):
     return text
 
 
-def postprocess_output(text: str, postprocess:bool) -> str:
+def get_prefix_without_bad_substrings(text, bad_substrings):
+    text = text.strip()
+
+    for i in range(len(text) + 1):
+        prefix = text[:i]
+        if not any(bad in prefix for bad in bad_substrings):
+            continue
+        else:
+            return text[:i-1]  # Возвращаем предыдущий префикс без запрещённой подстроки
+    return text  # Если ни одна из подстрок не встретилась
+
+
+def postprocess_output(text: str, postprocess:bool, math_mode:bool, bad_substrings) -> str:
     if text is None:
         return ""
     if postprocess:
-        text = extract_boxed_content(text)
-        text = text.strip()
+        if math_mode:
+            text = extract_boxed_content(text)
+            text = text.strip()
+        elif bad_substrings is not None:
+            return get_prefix_without_bad_substrings(text, bad_substrings)
     return text
 
 
