@@ -96,8 +96,8 @@ async def proxy_chat_completions(request: Request):
 
     response = await client.post(f"{app_settings.server_settings.VLLM_SERVER_URL}/v1/chat/completions", json=body, headers=headers)
     result = response.json()
-    # print(f"body: {body}")
-    # print(f"result: {result}")
+    print(f"body: {body}")
+    print(f"result: {result}")
  
     # Postprocess output
     if "choices" in result:
