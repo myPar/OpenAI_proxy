@@ -144,5 +144,6 @@ def preprocess_system_prompt_chat(messages: list) -> list:
         if sys_prompt is not None and sys_prompt.strip() != "" and chat_item['role'] == 'user':
             chat_item['content'] = sys_prompt + '\n' + chat_item['content']
         result_messages.append(chat_item)
+        i += 1
 
     return result_messages

@@ -5,6 +5,7 @@ from settings import app_settings
 from contextlib import asynccontextmanager
 from exceptions import FatalServerException, FormatServerException
 from tools import *
+import sys
 
 
 chat_roles = {'user', 'assistant', 'system'}
@@ -72,15 +73,16 @@ async def proxy_chat_completions(request: Request):
                 # if no few-shot preprocess just do system prompt preprocess
                 body["messages"] = preprocess_system_prompt_chat(body["messages"])
         except FatalServerException as e:
+            print(str(e), file=sys.stderr)
             return e.get_json()
         except FormatServerException as e:
-            #TODO: add logging
+            print(str(e), file=sys.stderr)
             # format is invalid - no preprocessing
             if app_settings.server_settings.PROPER_CHAT_FORMAT:
                 return e.get_json()
     else:
         e = FormatServerException('no messages in the request')
-        # TODO: add logging
+        print(str(e), file=sys.stderr)
         if app_settings.server_settings.PROPER_CHAT_FORMAT:
             return e.get_json()
     headers = {
