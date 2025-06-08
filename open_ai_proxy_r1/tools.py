@@ -21,13 +21,21 @@ def get_prefix_without_bad_substrings(text, bad_substrings):
     return text  # Если ни одна из подстрок не встретилась
 
 
-def postprocess_code(code:str) -> str:
-    func_match = re.search(r'def.*?\n', code)
-    if func_match is None:
-        return code # no postprocessing
-    st_pos, end_pos = func_match.span()
-
-    return code[end_pos - 1:]    # add stripped '\n' to the start
+def postprocess_code(code: str) -> str:
+    # extract the first python code block from markdown if present
+    pattern = r'```python\s*\n(.*?)```'
+    match = re.search(pattern, code, re.DOTALL)
+    if match:
+        # use ONLY the extracted code block content for further processing
+        code = match.group(1)
+    
+    # remove function signature if found in the code
+    function_match = re.search(r'def\b.*?\n', code)
+    if function_match:
+        start, end = function_match.span()
+        code = code[end - 1:]  # content after function signature (with '\n' start)
+    
+    return code
 
 
 def postprocess_output(text: str, postprocess:bool, math_mode:bool, code_mode:bool, bad_substrings) -> str:
