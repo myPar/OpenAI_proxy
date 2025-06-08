@@ -5,6 +5,7 @@
         "RETURN_THINK_DATA": true,
         "POSTPROCESS": true,
         "MATHEMATIC": false,
+        "CODE": false,
         "PREPROCESS_FEW_SHOT": false,
         "PROPER_CHAT_FORMAT": true,
         "DEFAULT_MODEL_SETTINGS": true,

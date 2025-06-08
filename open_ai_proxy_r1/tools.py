@@ -21,13 +21,24 @@ def get_prefix_without_bad_substrings(text, bad_substrings):
     return text  # Если ни одна из подстрок не встретилась
 
 
-def postprocess_output(text: str, postprocess:bool, math_mode:bool, bad_substrings) -> str:
+def postprocess_code(code:str) -> str:
+    func_match = re.search(r'def.*?\n', code)
+    if func_match is None:
+        return code # no postprocessing
+    st_pos, end_pos = func_match.span()
+
+    return code[end_pos - 1:]    # add stripped '\n' to the start
+
+
+def postprocess_output(text: str, postprocess:bool, math_mode:bool, code_mode:bool, bad_substrings) -> str:
     if text is None:
         return ""
     if postprocess:
         if math_mode:
             text = extract_boxed_content(text)
             text = text.strip()
+        elif code_mode:
+            return postprocess_code(text)
         elif bad_substrings is not None:
             return get_prefix_without_bad_substrings(text, bad_substrings)
     return text

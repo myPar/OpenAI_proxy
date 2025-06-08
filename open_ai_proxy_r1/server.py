@@ -48,7 +48,8 @@ async def proxy_completions(request: Request):
         for choice in result["choices"]:
             choice["text"] = postprocess_output(choice["text"], 
                                                 app_settings.server_settings.POSTPROCESS, 
-                                                app_settings.server_settings.MATHEMATIC, 
+                                                app_settings.server_settings.MATHEMATIC,
+                                                app_settings.server_settings.CODE,
                                                 stop
                                                 )
 
@@ -75,6 +76,7 @@ async def proxy_chat_completions(request: Request):
         except FatalServerException as e:
             print(str(e), file=sys.stderr)
             return e.get_json()
+        
         except FormatServerException as e:
             print(str(e), file=sys.stderr)
             # format is invalid - no preprocessing
@@ -98,7 +100,6 @@ async def proxy_chat_completions(request: Request):
 
     response = await client.post(f"{app_settings.server_settings.VLLM_SERVER_URL}/v1/chat/completions", json=body, headers=headers)
     result = response.json()
-    print(f"body: {body}")
     print(f"result: {result}")
  
     # Postprocess output
@@ -109,7 +110,8 @@ async def proxy_chat_completions(request: Request):
                     choice["message"].pop("reasoning_content")
                 choice["message"]["content"] = postprocess_output(choice["message"]["content"], 
                                                                   app_settings.server_settings.POSTPROCESS, 
-                                                                  app_settings.server_settings.MATHEMATIC, 
+                                                                  app_settings.server_settings.MATHEMATIC,
+                                                                  app_settings.server_settings.CODE,
                                                                   stop
                                                                   )
 

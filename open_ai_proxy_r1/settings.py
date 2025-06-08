@@ -17,6 +17,7 @@ class ServerSettings(BaseModel):
     RETURN_THINK_DATA: bool # weather return reasoning_content field or not
     POSTPROCESS: bool       # use output postprocessing or not
     MATHEMATIC: bool        # weather to ask to solve mathematic task or not
+    CODE: bool              # code benchmarks postprocessing settings
     PREPROCESS_FEW_SHOT: bool # weather convert few shot prompt to a single user message or not
     PROPER_CHAT_FORMAT: bool # if the chat messages order/format is invalid and this field is enabled an error response will be returned
     DEFAULT_MODEL_SETTINGS: bool # use default (recommended model parameters)
