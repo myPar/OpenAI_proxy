@@ -6,7 +6,7 @@
         "POSTPROCESS": true,
         "MATHEMATIC": false,
         "CODE": false,
-        "PREPROCESS_FEW_SHOT": false,
+        "FEW_SHOT_MODE": "DROP",
         "PROPER_CHAT_FORMAT": true,
         "DEFAULT_MODEL_SETTINGS": true,
         "CLIENT_TIMEOUT": 6000
@@ -14,7 +14,7 @@
     "model_settings": {
         "temperature": 0.6,
         "top_p": 0.95,
-        "max_completion_tokens": 3072,
+        "max_completion_tokens": 1024,
         "stop": []
     }
 }

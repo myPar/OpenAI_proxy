@@ -2,6 +2,13 @@ from pydantic import BaseModel
 import pydantic_core
 import json
 from typing import List
+from enum import Enum
+
+
+class FewShotMode(str, Enum):
+    NO_PREPROCESS = "NO_PREPROCESS"
+    PREPROCESS = "PREPROCESS"
+    DROP = "DROP"
 
 
 class ModelSettings(BaseModel):
@@ -18,7 +25,7 @@ class ServerSettings(BaseModel):
     POSTPROCESS: bool       # use output postprocessing or not
     MATHEMATIC: bool        # weather to ask to solve mathematic task or not
     CODE: bool              # code benchmarks postprocessing settings
-    PREPROCESS_FEW_SHOT: bool # weather convert few shot prompt to a single user message or not
+    FEW_SHOT_MODE: FewShotMode # few shot preprocess mode: "NO_PREPROCESS", "PREPROCESS", "DROP"
     PROPER_CHAT_FORMAT: bool # if the chat messages order/format is invalid and this field is enabled an error response will be returned
     DEFAULT_MODEL_SETTINGS: bool # use default (recommended model parameters)
     CLIENT_TIMEOUT: int # timeout in seconds for the http client

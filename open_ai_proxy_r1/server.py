@@ -67,12 +67,7 @@ async def proxy_chat_completions(request: Request):
             # first - preprocess math
             if app_settings.server_settings.MATHEMATIC:
                 body["messages"] = preprocess_math_chat(body["messages"])
-            if app_settings.server_settings.PREPROCESS_FEW_SHOT:
-                # includes system prompt preprocess
-                body["messages"] = preprocess_few_shot(body["messages"])
-            else:
-                # if no few-shot preprocess just do system prompt preprocess
-                body["messages"] = preprocess_system_prompt_chat(body["messages"])
+            body["messages"] = preprocess_few_shot(body["messages"], app_settings.server_settings.FEW_SHOT_MODE)
         except FatalServerException as e:
             print(str(e), file=sys.stderr)
             return e.get_json()
@@ -97,7 +92,7 @@ async def proxy_chat_completions(request: Request):
         body["stop"] = app_settings.model_settings.stop   # set stop field
         body["max_completion_tokens"] = app_settings.model_settings.max_completion_tokens
         body["top_p"] = app_settings.model_settings.top_p
-
+    print(body)
     response = await client.post(f"{app_settings.server_settings.VLLM_SERVER_URL}/v1/chat/completions", json=body, headers=headers)
     result = response.json()
     print(f"result: {result}")

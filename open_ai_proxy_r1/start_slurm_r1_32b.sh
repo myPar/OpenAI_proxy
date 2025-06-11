@@ -41,7 +41,7 @@ echo $VLLM_PID > vllm.pid
 
 # wait till vllm server is up
 echo "Waiting for vLLM server to start..."
-for i in {1..600000}; do
+for i in {1..60000}; do
     if curl -s -H "Authorization: Bearer token-abc123" http://localhost:8001/v1/models | grep -q '"object"'; then
         echo "vLLM server is up!"
         break

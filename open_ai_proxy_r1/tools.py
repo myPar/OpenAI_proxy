@@ -1,5 +1,6 @@
 import re
 from exceptions import FatalServerException, FormatServerException
+from settings import FewShotMode
 
 
 def extract_boxed_content(text):
@@ -45,9 +46,13 @@ def postprocess_output(text: str, postprocess:bool, math_mode:bool, code_mode:bo
         if math_mode:
             text = extract_boxed_content(text)
             text = text.strip()
-        elif code_mode:
-            return postprocess_code(text)
-        elif bad_substrings is not None:
+
+            return text
+        if code_mode:
+            code = postprocess_code(text)
+            if code != text:    # check code was extracted
+                return code 
+        if bad_substrings is not None:
             return get_prefix_without_bad_substrings(text, bad_substrings)
     return text
 
@@ -95,8 +100,23 @@ def check_chat_format(messages: list):
         raise FormatServerException(f"last chat item should be an user prompt, got {messages[-1]['role']} instead")
 
 
+def drop_few_shot(messages: list) -> list:
+    result = []
+
+    if len(messages) <= 1:
+        return messages
+    system_item = None if messages[0]['role'] != 'system' else messages[0]
+    assert messages[-1]['role'] == 'user'
+
+    if system_item is not None:
+        result.append(system_item)
+    result.append(messages[-1])
+
+    return result
+
+
 # returns one user message instead of chat dialog:
-def preprocess_few_shot(messages: list) -> list:
+def join_few_shot(messages: list) -> list:
     i = 0
     system_prompt = None
 
@@ -106,7 +126,7 @@ def preprocess_few_shot(messages: list) -> list:
             if len(messages) == 2:
                 assert messages[1]['role'] == 'user'    # only user role can be after system
                 
-                return [{'role':'user', 'content': system_prompt + "\n" + messages[1]['content']}]
+                return [{'role':'user', 'content': (system_prompt + "\n" if system_prompt.strip() != '' else "") + messages[1]['content']}]
         # build single dialog prompt:
         result_prompt = "" if system_prompt is None else system_prompt + "\n"
         result_prompt += "here is a dialog, answer user's last query:\n"
@@ -114,7 +134,6 @@ def preprocess_few_shot(messages: list) -> list:
 
         for i in range(1, len(messages)):
             dialog_item = messages[i]
-            #print(f'dialog state = {dialog_state}, dialog_item role = {dialog_item['role']}')
             assert dialog_item['role'] == dialog_state
             content = dialog_item['content']
 
@@ -149,20 +168,13 @@ def preprocess_math_chat(messages: list) -> list:
     return result_messages
 
 
-def preprocess_system_prompt_chat(messages: list) -> list:
-    result_messages = []
-    sys_prompt = None
-    i = 0
-
-    while i < len(messages):
-        chat_item = messages[i]
-        if chat_item['role'] == 'system':
-            sys_prompt = chat_item['content']
-            i += 1
-            continue
-        if sys_prompt is not None and sys_prompt.strip() != "" and chat_item['role'] == 'user':
-            chat_item['content'] = sys_prompt + '\n' + chat_item['content']
-        result_messages.append(chat_item)
-        i += 1
-
-    return result_messages
+def preprocess_few_shot(messages: list, mode: FewShotMode) -> list:
+    if mode == FewShotMode.NO_PREPROCESS:
+        return messages
+    elif mode == FewShotMode.DROP:
+        messages = drop_few_shot(messages)
+        return join_few_shot(messages)
+    elif mode == FewShotMode.PREPROCESS:
+        return join_few_shot(messages)
+    else:
+        assert False
