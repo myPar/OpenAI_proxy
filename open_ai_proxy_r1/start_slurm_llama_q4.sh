@@ -33,7 +33,7 @@ export CUDA_VISIBLE_DEVICES=0
 
 # run vllm server:
 vllm serve "neuralmagic/DeepSeek-R1-Distill-Llama-70B-quantized.w4a16" \
-    --enable-reasoning --reasoning-parser deepseek_r1 --api-key='token-abc123' --port 8001 &
+    --enable-reasoning --reasoning-parser deepseek_r1 --api-key='token-abc123' --trust-remote-code --port 8001 &
 # cache pid for killing in future:
 VLLM_PID=$!
 echo "vLLM PID: $VLLM_PID"
