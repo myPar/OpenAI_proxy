@@ -4,7 +4,7 @@
 #SBATCH --output=output
 #SBATCH --error=output.err
 #SBATCH --nodes=1
-#SBATCH --nodelist=ngpu09
+#SBATCH --nodelist=ngpu06
 #SBATCH --ntasks=1
 #SBATCH --cpus-per-task=1
 
@@ -29,11 +29,11 @@ export HF_HOME="/userspace/bak2/hf"
 export HF_TOKEN=""
 export VLLM_NO_USAGE_STATS=1
 export VLLM_CACHE_ROOT="/userspace/bak2/vllm_cache"
-export CUDA_VISIBLE_DEVICES=0,1,2,3,4,5,6,7
+export CUDA_VISIBLE_DEVICES=0
 
 # run vllm server:
-vllm serve "neuralmagic/DeepSeek-R1-Distill-Llama-70B-quantized.w8a8" \
-    --enable-reasoning --reasoning-parser deepseek_r1 --tensor-parallel-size 8 --api-key='token-abc123' --port 8001 &
+vllm serve "neuralmagic/DeepSeek-R1-Distill-Llama-70B-quantized.w4a16" \
+    --enable-reasoning --reasoning-parser deepseek_r1 --api-key='token-abc123' --port 8001 &
 # cache pid for killing in future:
 VLLM_PID=$!
 echo "vLLM PID: $VLLM_PID"
@@ -67,6 +67,6 @@ for i in {1..240}; do
     sleep 1
 done
 
-python /userspace/bak2/llama_r1_q8/OpenAI_proxy/open_ai_proxy_r1/test_client.py
+python /userspace/bak2/llama_r1_q4/OpenAI_proxy/open_ai_proxy_r1/test_client.py
 kill $VLLM_PID
 kill $PROXY_PID
