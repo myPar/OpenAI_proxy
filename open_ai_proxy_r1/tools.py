@@ -129,7 +129,7 @@ def join_few_shot(messages: list) -> list:
                 return [{'role':'user', 'content': (system_prompt + "\n" if system_prompt.strip() != '' else "") + messages[1]['content']}]
         # build single dialog prompt:
         result_prompt = "" if system_prompt is None else system_prompt + "\n"
-        result_prompt += "here is a dialog, answer user's last query:\n"
+        result_prompt += "Ниже приведён диалог, ответь на последний запрос USER:\n"
         dialog_state = 'user'   # initial dialog state is user
 
         for i in range(1, len(messages)):
