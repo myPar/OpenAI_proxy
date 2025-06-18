@@ -4,7 +4,7 @@
 #SBATCH --output=output
 #SBATCH --error=output.err
 #SBATCH --nodes=1
-#SBATCH --nodelist=ngpu06
+#SBATCH --nodelist=ngpu09
 #SBATCH --ntasks=1
 #SBATCH --cpus-per-task=1
 
