@@ -1,11 +1,11 @@
 {
     "server_settings": {
-        "VLLM_SERVER_URL": "http://localhost:8001",
-        "OPENAI_API_KEY": "token-abc123",
-        "PROPER_CHAT_FORMAT": true,
-        "CLIENT_TIMEOUT": 6000
+        "vllm_server_url": "http://localhost:8001",
+        "openai_api_key": "token-abc123",
+        "proper_chat_format": true,
+        "client_timeout": 600
     },
-    "model_settings": {
+    "default_model_settings": {
         "temperature": 0.6,
         "top_p": 0.95,
         "max_completion_tokens": 1024,

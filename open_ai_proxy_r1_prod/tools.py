@@ -4,59 +4,76 @@ from settings import FewShotMode
 from dtos import ChatCompletionRequest, CompletionRequest, ChatMessage
 
 
-def extract_boxed_content(text):
-    match = re.search(r'\\boxed\{(.*?)}', text)
-    if match:
-        return match.group(1)
+def drop_think_data(text: str) -> str:
+    assert text is not None
+    st_pos = text.find('<think>')
+    end_pos = text.find('</think>')
+
+    if end_pos != -1:   # </think> ...
+        st_pos = 0 if st_pos == -1 else st_pos  # ...<think>...</think>...
+        return text[:st_pos] + text[end_pos+len('</think>'):]
+    elif st_pos != -1:
+        return text[:st_pos]    # ...<think>
     return text
 
 
-def postprocess_output(text: str, math_mode:bool) -> str:
+def extract_boxed_content(text) -> str:
+    match = re.search(r'\\boxed\{(.*)}', text, re.DOTALL)
+
+    if match:
+        _, end_pos = match.span(1)
+        st_pos = text.find('\\boxed{')
+        answer = match.group(1)
+        return text[:st_pos] + answer + text[end_pos+1:]
+    return text
+
+
+def postprocess_output(text: str, math_mode:bool, think_data:bool=True) -> str:
     if text is None:
         return ""
+    if not think_data:   # drop think data if necessary (only for completion endpoint)
+        text = drop_think_data(text)
     if math_mode:
         text = extract_boxed_content(text)
-        text = text.strip()
-        return text
+        return text.strip()
 
     return text
 
 
-def check_chat_format(request_dto: ChatCompletionRequest):
-    messages: list = request_dto.messages
-    
-    if not isinstance(messages, list):
-        raise FormatServerException("Input must be a list of chat messages.")    
-    system_prompt_exists = False
-    dialog_state = 'user'   # initial dialog state is user
-    
-    for i in range(len(messages)):
-        dialog_item = messages[i]
-        cur_role = dialog_item.role
+def check_chat_format(request_dto: ChatCompletionRequest) -> None:
+    messages = request_dto.messages
 
-        # check system prompt
-        if cur_role == 'system':
-            if system_prompt_exists:
-                raise FormatServerException(f'system prompt already exists another one found in {i} chat item')
+    if not isinstance(messages, list):
+        raise FormatServerException("Input must be a list of chat messages.")
+    if not messages:
+        raise FormatServerException("Chat messages list is empty.")
+
+    expected_roles = {'system', 'user', 'assistant'}
+    system_prompt_seen = False
+    expected_next = 'user'
+
+    for i, message in enumerate(messages):
+        role = message.role
+        # check that role is in the expected roles set
+        if role not in expected_roles:
+            raise FormatServerException(f"Invalid role '{role}' at item {i}, only 'user', 'assistant', 'system' allowed.")
+
+        if role == 'system':
+            if system_prompt_seen:
+                raise FormatServerException(f"Multiple system prompts found; second one at item {i}.")
             if i != 0:
-                raise FormatServerException(f"system prompt should be at the dialog's start, but found in {i} chat item")
+                raise FormatServerException(f"System prompt must be the first message, found at item {i}.")
             if len(messages) == 1:
-                # only system prompt exists
-                raise FormatServerException(f"only system prompt exists, no another chat items")
-            system_prompt_exists = True
-        elif cur_role == 'user':
-            if dialog_state != 'user':
-                raise FormatServerException(f"expected '{dialog_state}' dialog role in {i} chat item, but got user instead")
-            dialog_state = 'assistant'
-        elif cur_role == 'assistant':
-            if dialog_state != 'assistant':
-                raise FormatServerException(f"expected '{dialog_state}' dialog role, in {i} chat item but got assistant instead")
-            dialog_state = 'user'   
-        else:
-            raise FormatServerException(f"invalid role {cur_role} in {i} chat item, only 'user', 'assistant', 'system' are supported: {str(dialog_item)}")
-    # last message should be a user message
+                raise FormatServerException("Only system prompt exists, no further dialog.")
+            system_prompt_seen = True
+        elif role != expected_next:
+            raise FormatServerException(
+                f"Expected '{expected_next}' role at item {i}, but got '{role}'."
+            )
+        expected_next = 'assistant' if role == 'user' else 'user'
+
     if messages[-1].role != 'user':
-        raise FormatServerException(f"last chat item should be an user prompt, got {messages[-1].role} instead")
+        raise FormatServerException(f"Last message must be from 'user', got '{messages[-1].role}'.")
 
 
 def drop_few_shot(messages: list) -> list:
@@ -76,52 +93,47 @@ def drop_few_shot(messages: list) -> list:
 
 # returns one user message instead of chat dialog:
 def join_few_shot(messages: list) -> list:
-    i = 0
-    system_prompt = None
+    if len(messages) < 2:
+        return messages  # Нечего объединять
 
-    if len(messages) >= 2:
-        if messages[0].role == 'system':
-            system_prompt = messages[0].content
-            if len(messages) == 2:
-                assert messages[1].role == 'user'    # only user role can be after system
-                result_msg = ChatMessage.model_validate({'role':'user', 'content': (system_prompt + "\n" if system_prompt.strip() != '' else "") + messages[1].content})
+    system_prompt = messages[0].content if messages[0].role == 'system' else None
+    start_idx = 1 if system_prompt else 0
 
-                return [result_msg]
-        # build single dialog prompt:
-        result_prompt = "" if system_prompt is None else system_prompt + "\n"
-        result_prompt += "Ниже приведён пример ожидаемого от тебя диалога, ответь на последний запрос пользователя, с учётом контекста:\n"
-        dialog_state = 'user'   # initial dialog state is user
+    # Обработка случая из двух сообщений: system + user
+    if system_prompt and len(messages) == 2:
+        assert messages[1].role == 'user'
+        content = (system_prompt + "\n" if system_prompt.strip() else "") + messages[1].content
+        return [ChatMessage.model_validate({'role': 'user', 'content': content})]
 
-        for i in range(1, len(messages)):
-            dialog_item = messages[i]
-            assert dialog_item.role == dialog_state
-            content = dialog_item.content
+    # Собираем диалог в один промпт
+    prompt_parts = []
+    if system_prompt:
+        prompt_parts.append(system_prompt)
+    prompt_parts.append("Ниже приведён пример ожидаемого от тебя диалога, ответь на последний запрос пользователя, с учётом контекста:")
 
-            if dialog_state == 'user':
-                result_prompt += "Пользователь: " + content + "\n"
-                dialog_state = 'assistant'
-            elif dialog_state == 'assistant':
-                result_prompt += 'Твой ответ: ' + content + "\n"
-                dialog_state = 'user'
-            else:
-                assert False
-        assert messages[-1].role == 'user'
-        result_msg = ChatMessage.model_validate({'role':'user', 'content': result_prompt})
+    expected_role = 'user'
+    for msg in messages[start_idx:]:
+        assert msg.role == expected_role
+        if msg.role == 'user':
+            prompt_parts.append(f"Пользователь: {msg.content}")
+            expected_role = 'assistant'
+        else:
+            prompt_parts.append(f"Твой ответ: {msg.content}")
+            expected_role = 'user'
 
-        return [result_msg]
-    else:
-        return messages # no changes needed
+    assert messages[-1].role == 'user'
+    full_prompt = "\n".join(prompt_parts)
+    return [ChatMessage.model_validate({'role': 'user', 'content': full_prompt})]
 
 
-def preprocess_math(request_dto: CompletionRequest) -> str:
-    if request_dto.r1_settings.math:
-        return "You will be given a problem. Please reason step by step, and put your final answer within \\boxed{}:\n" + request_dto.prompt
-    return request_dto.prompt
+def preprocess_math(prompt: str, math_mode: bool) -> str:
+    if math_mode:
+        return "You will be given a problem. Please reason step by step, and put your final answer within \\boxed{}:\n" + prompt
+    return prompt
     
 
-def preprocess_math_chat(request_dto: ChatCompletionRequest) -> list:
-    messages = request_dto.messages
-    if not request_dto.r1_settings.math:
+def preprocess_math_chat(messages:list, math_mode: bool) -> list:
+    if not math_mode:
         return messages # no preprocessing
     result_messages = []
 
@@ -135,16 +147,13 @@ def preprocess_math_chat(request_dto: ChatCompletionRequest) -> list:
     return result_messages
 
 
-def preprocess_few_shot(request_dto: ChatCompletionRequest) -> list:
-    messages: list = request_dto.messages
-    mode: FewShotMode = request_dto.r1_settings.few_shot_mode
-
-    if mode == FewShotMode.NO_PREPROCESS:
+def preprocess_few_shot(messages:list, few_shot_mode: FewShotMode) -> list:
+    if few_shot_mode == FewShotMode.NO_PREPROCESS:
         return messages
-    elif mode == FewShotMode.DROP:
+    elif few_shot_mode == FewShotMode.DROP:
         messages = drop_few_shot(messages)
         return join_few_shot(messages)
-    elif mode == FewShotMode.PREPROCESS:
+    elif few_shot_mode == FewShotMode.PREPROCESS:
         return join_few_shot(messages)
     else:
         assert False
