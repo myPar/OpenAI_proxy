@@ -113,16 +113,13 @@ pip install -r requirements.txt
 ### Запуск
 
 #### vllm-сервер + прокси
-Ниже будет показан запуск проекта с моделью [DeepSeek-R1-Distill-Qwen-32B-quantized.w4a16](https://huggingface.co/RedHatAI/DeepSeek-R1-Distill-Qwen-32B-quantized.w4a16), она же используется по умолчанию. Изначально модель требуется загрузить, для этого будет использоваться huggingface access token, можете использовать этот для
-первичной загрузки весов модели:
-```bash
-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
-```
+Ниже будет показан запуск проекта с моделью [DeepSeek-R1-Distill-Qwen-32B-quantized.w4a16](https://huggingface.co/RedHatAI/DeepSeek-R1-Distill-Qwen-32B-quantized.w4a16), она же используется по умолчанию. Изначально модель требуется загрузить, для этого будет использоваться huggingface access token, можете использовать тот, что я скину для первичной загрузки весов модели.
+
 ⚠️Потом нужно будет создать свой⚠️, либо использовать локальную загрузку весов с диска без синхронизации с huggingface.
 Убедитесь, что виртуальное окружение активировано в текущей bash-сессии и запустите скрипт `start_all.sh`:
 
 ```bash
-bash start_all.sh hf_token=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 model_name=RedHatAI/DeepSeek-R1-Distill-Qwen-32B-quantized.w4a16 gpu_count=2 model_load_timeout=6000
+bash start_all.sh hf_token=your_token_here model_name=RedHatAI/DeepSeek-R1-Distill-Qwen-32B-quantized.w4a16 gpu_count=2 model_load_timeout=6000
 ```
 
 Данный скрипт запускает vllm-сервер с моделью, после того, как он запустился - производится запуск прокси сервера. Первичный запуск займёт довольно продолжительное время, поскольку сначала vllm должен скачать веса. При последующих запусках время загрузки должно занимать не более 1 - 3 минут.
@@ -131,7 +128,7 @@ bash start_all.sh hf_token=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 model_name=RedH
 
 Если прокси вам не нужен, можете запустить только vllm-сервер и использовать его:
 ```bash
-bash start_vllm.sh hf_token=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 model_name=RedHatAI/DeepSeek-R1-Distill-Qwen-32B-quantized.w4a16 gpu_count=2 model_load_timeout=6000
+bash start_vllm.sh hf_token=your_token_here model_name=RedHatAI/DeepSeek-R1-Distill-Qwen-32B-quantized.w4a16 gpu_count=2 model_load_timeout=6000
 ```
 
 #### прокси сервер
